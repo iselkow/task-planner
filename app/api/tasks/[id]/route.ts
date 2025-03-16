@@ -12,12 +12,19 @@ export async function GET(
     });
     
     if (!task) {
-      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Task not found' },
+        { status: 404 }
+      );
     }
     
     return NextResponse.json(task);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch task' }, { status: 500 });
+    console.error('Error fetching task:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch task' },
+      { status: 500 }
+    );
   }
 }
 
@@ -44,7 +51,11 @@ export async function PATCH(
     
     return NextResponse.json(task);
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
+    console.error('Error updating task:', error);
+    return NextResponse.json(
+      { error: 'Failed to update task' },
+      { status: 500 }
+    );
   }
 }
 
@@ -60,6 +71,10 @@ export async function DELETE(
     
     return NextResponse.json({ message: 'Task deleted successfully' });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 });
+    console.error('Error deleting task:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete task' },
+      { status: 500 }
+    );
   }
 } 
