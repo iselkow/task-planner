@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import OpenAI from 'openai';
+import { generateTaskPlanPrompt } from '@/lib/prompts';
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // POST /api/plan - Generate a plan using AI
 export async function POST(request: Request) {
@@ -21,44 +28,39 @@ export async function POST(request: Request) {
       );
     }
     
-    // Prepare the prompt for the AI
-    const tasksData = tasks.map(task => ({
-      id: task.id,
-      name: task.name,
-      description: task.description,
-      dueDate: task.dueDate,
-    }));
-    
-    // In a real implementation, you would call an AI API here
-    // For now, we'll simulate a response
-    const aiResponse = await simulateAIPlanning(tasksData, customInstructions);
+    // Generate the prompt using our helper function
+    const prompt = generateTaskPlanPrompt(tasks, customInstructions);
+
+    // Call OpenAI API
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-turbo", // or another appropriate model
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful assistant that creates task plans. Always respond with valid JSON."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    // Parse the response
+    const aiResponseText = response.choices[0].message.content;
+    if (!aiResponseText) {
+      throw new Error("Empty response from AI");
+    }
+
+    const aiResponse = JSON.parse(aiResponseText);
     
     return NextResponse.json({ plan: aiResponse });
   } catch (error) {
+    console.error('Error generating plan:', error);
     return NextResponse.json(
       { error: 'Failed to generate plan' },
       { status: 500 }
     );
   }
-}
-
-// This is a placeholder function that simulates an AI response
-// In a real implementation, you would call an actual AI API
-async function simulateAIPlanning(tasks: any[], customInstructions?: string) {
-  // In a real implementation, you would:
-  // 1. Format the tasks and instructions into a prompt
-  // 2. Call an AI API (like OpenAI)
-  // 3. Parse the response
-  
-  // For now, return a simple mock response
-  return {
-    summary: "Here's a suggested plan for your tasks",
-    scheduledTasks: tasks.map((task, index) => ({
-      taskId: task.id,
-      suggestedStartDate: new Date(Date.now() + (index * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
-      suggestedEndDate: new Date(Date.now() + ((index + 1) * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
-      priority: index < 2 ? 'high' : index < 5 ? 'medium' : 'low',
-      notes: `This is a placeholder suggestion for task "${task.name}"`,
-    })),
-  };
 } 
