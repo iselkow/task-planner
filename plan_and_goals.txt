@@ -1,0 +1,24 @@
+Goals:
+- Try to build something w as little coding as possible
+- Have a calendar with a plan for what I need to do when
+
+MVP User Stories:
+- I can add a task
+  - Each task should have a name and a description
+- I can ask an AI to sort all of my tasks into a planting calendar
+  - Fetch all of the tasks from the database, interpret their descriptions
+  - Pass all of their descriptions and names into the AI along with a prompt requesting a general plan and timeline
+  - AI returns a plan
+  - Plan is converted to a calendar structure
+- I can edit, delete, or mark a task complete
+- I can send a custom request to my AI asking it to update the calendar according to some extra criteria
+- I can view all of my tasks in some sort of time-based view. This might be a calendar widget, or could be as simple as a table with dates
+
+Structure:
+- DB (initially SQLite local is fine)
+- NextJS app? Why NextJS?
+
+Post-MVP ideas:
+- Calendar integrates with my gcal, suggests things by weekend
+- Integrate with weather forecast?
+- Deploy somewhere that Suzanne can access (rpi?)
